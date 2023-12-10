@@ -53,3 +53,10 @@ Now, you have set up a virtual environment and installed the required dependenci
   ```bash
   deactivate
   ```
+
+## Updates
+
+Applying Low Pass filter and buffering coordinates for drawing detection
+* Display both hand and target and looks smooth
+* Prints coordinates and timestamp
+* 1st order Low Pass filter, clean

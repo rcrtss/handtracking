@@ -1,28 +1,55 @@
 import cv2
-import numpy
-from HandTracker import HandTracker
-from send_coordinates import send_coordinates
+import mediapipe as mp
+import time
+import numpy as np
+from LPFilter import LowPassFilter
 
+def landmarks_list_to_array(landmark_list, rows, cols):
+    return np.asarray([(lmk.x * cols, lmk.y * rows, lmk.z * cols)
+                       for lmk in landmark_list.landmark])
 
-# Create a VideoCapture object
-video_capture = cv2.VideoCapture(0)
+cap = cv2.VideoCapture(0)
 
-# Check if the camera is opened successfully
-if not video_capture.isOpened():
-    print("Error opening video stream or file")
+mpHands = mp.solutions.hands
+hands = mpHands.Hands()
 
-# Set relative path to pretrained model to use
-model_path = 'hand_landmarker.task'
+mpDraw = mp.solutions.drawing_utils
 
-# Create hand tracker object
-hand_tracker = HandTracker(video_capture, model_path)
+number_of_hands = 2
+number_of_landmarks = 21
+number_of_axis = 3
 
-# Main loop
+x = 0
+y = 0
+
+LPF_H0 = LowPassFilter(alpha=0.05)
+LPF_H1 = LowPassFilter(alpha=0.05)
+
 while True:
-    hand_tracker.calculate_finger_position(display=False)
-    x, y = hand_tracker.get_coordinates()
-    send_coordinates(x,y)
+    ret, frame = cap.read()
+    height = frame.shape[0]
+    width = frame.shape[1]
 
+    data = hands.process(frame)
+    results = data.multi_hand_landmarks
 
+    frame_landmarks = np.zeros([number_of_hands, number_of_landmarks, number_of_axis])
 
+    canvas = np.zeros((height, width, 3), np.uint8)
 
+    if results:
+        for idx, landmarks in enumerate(results):
+            landmarks =landmarks_list_to_array(landmarks, height, width)
+            frame_landmarks[idx] = landmarks
+
+    if(frame_landmarks[0][8][0]):
+        x,y = LPF_H0.apply(int(frame_landmarks[0][8][0]),int(frame_landmarks[0][8][1]))
+    canvas = cv2.circle(canvas, (x,y), radius=5, color=(0, 0, 255), thickness=-1)
+
+    if(frame_landmarks[1][8][0]):
+        x,y = LPF_H1.apply(int(frame_landmarks[1][8][0]),int(frame_landmarks[1][8][1]))
+    canvas = cv2.circle(canvas, (x,y), radius=5, color=(0, 0, 255), thickness=-1)
+
+    canvas = cv2.flip(canvas, 1)
+    cv2.imshow('tracked',canvas)
+    cv2.waitKey(1)
