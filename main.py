@@ -39,8 +39,8 @@ while True:
 
     if results:
         for idx, landmarks in enumerate(results):
-            landmarks =landmarks_list_to_array(landmarks, height, width)
-            frame_landmarks[idx] = landmarks
+            landmarks_array = landmarks_list_to_array(landmarks, height, width)
+            frame_landmarks[idx, :len(landmarks_array)] = landmarks_array
 
     if(frame_landmarks[0][8][0]):
         x,y = LPF_H0.apply(int(frame_landmarks[0][8][0]),int(frame_landmarks[0][8][1]))
