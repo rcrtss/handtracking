@@ -17,7 +17,7 @@ pip-selfcheck.json
 ttx*
 
 # other
-*.txt
+out*
 *.xlsx
 *.pyc
 *.bak
