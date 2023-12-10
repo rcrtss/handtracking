@@ -24,5 +24,5 @@
 # # Close the named pipe
 # os.close(pipeout)
 
-def send_coordinates(x,y):
-    print(x,",",y)
+def send_coordinates(t,x,y):
+    print(t,",",x,",",y)
