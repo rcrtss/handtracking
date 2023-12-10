@@ -22,11 +22,11 @@ number_of_axis = 3
 x = 0
 y = 0
 
-LPF_H0 = LowPassFilter(alpha=0.05)
-LPF_H1 = LowPassFilter(alpha=0.05)
+LPF_H0 = LowPassFilter(alpha=0.3)
+LPF_H1 = LowPassFilter(alpha=0.3)
 
 while True:
-    ret, frame = cap.read()
+    _, frame = cap.read()
     height = frame.shape[0]
     width = frame.shape[1]
 
@@ -35,7 +35,9 @@ while True:
 
     frame_landmarks = np.zeros([number_of_hands, number_of_landmarks, number_of_axis])
 
-    canvas = np.zeros((height, width, 3), np.uint8)
+    canvas = frame
+    # Comment line above and uncomment below to have a black blackground instead of the input frame
+    # canvas = np.zeros((height, width, 3), np.uint8)
 
     if results:
         for idx, landmarks in enumerate(results):
